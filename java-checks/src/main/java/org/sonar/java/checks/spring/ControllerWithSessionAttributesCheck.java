@@ -67,7 +67,8 @@ public class ControllerWithSessionAttributesCheck extends IssuableSubscriptionVi
     if (classMetadata.isAnnotatedWith("org.springframework.stereotype.Controller")
         && sessionAttributesAnnotation.isPresent()
         && classTree.members().stream().noneMatch(ControllerWithSessionAttributesCheck::methodCompletesSessionStatus)) {
-      reportIssue(sessionAttributesAnnotation.get().annotationType(), "Add a call to \"setComplete()\" on the SessionStatus object in a \"@RequestMapping\" method that handles \"POST\".");
+      reportIssue(sessionAttributesAnnotation.get().annotationType(),
+          "Add a call to \"setComplete()\" on the SessionStatus object in a \"@RequestMapping\" method that handles \"POST\".");
     }
   }
 
@@ -94,13 +95,12 @@ public class ControllerWithSessionAttributesCheck extends IssuableSubscriptionVi
           .flatMap(ControllerWithSessionAttributesCheck::extractValues)
           .collect(Collectors.toList());
       if (methodValues.size() == 1) {
-        ExpressionTree requestMethod = methodValues.get(0);
-        String currentMethod = getRequestMethodEnumEntry(requestMethod);
-        return currentMethod.equals("POST");
+        return getRequestMethodEnumEntry(methodValues.get(0)).equals("POST");
       }
       return false;
+    } else {
+      return annotation.symbolType().is("org.springframework.web.bind.annotation.PostMapping");
     }
-    return annotation.symbolType().is("org.springframework.web.bind.annotation.PostMapping");
   }
 
   // FIXME copy pasted from SpringComposedRequestMappingCheck
@@ -145,7 +145,9 @@ public class ControllerWithSessionAttributesCheck extends IssuableSubscriptionVi
     boolean found;
     @Override
     public void visitMethodInvocation(MethodInvocationTree tree) {
-      System.out.println(tree);
+      if (tree.symbol().toString().equals("SessionStatus#setComplete()")) {
+        found = true;
+      }
     }
   }
 }
