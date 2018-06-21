@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-@SessionAttributes("foo") // Noncompliant [[sc=1;ec=19]] {{Add a call to "setComplete()" on the SessionStatus object in a "@RequestMapping" method that handles "POST".}}
+@SessionAttributes("foo") // Noncompliant [[sc=2;ec=19]] {{Add a call to "setComplete()" on the SessionStatus object in a "@RequestMapping" method that handles "POST".}}
 public class Foo {
 
   @RequestMapping("/foo")
