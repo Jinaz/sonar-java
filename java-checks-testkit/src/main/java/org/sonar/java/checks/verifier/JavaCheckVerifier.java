@@ -75,7 +75,7 @@ public class JavaCheckVerifier extends CheckVerifier {
   /**
    * Default location of the jars/zips to be taken into account when performing the analysis.
    */
-  private static final String DEFAULT_TEST_JARS_DIRECTORY = "target/test-jars";
+  static final String DEFAULT_TEST_JARS_DIRECTORY = "target/test-jars";
   private String testJarsDirectory;
   private boolean providedJavaVersion = false;
   private JavaVersion javaVersion = new JavaVersionImpl();

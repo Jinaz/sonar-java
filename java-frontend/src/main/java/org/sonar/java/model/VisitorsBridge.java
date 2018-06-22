@@ -37,7 +37,7 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.Rule;
 import org.sonar.java.AnalysisError;
-import org.sonar.java.CrossFileScanner;
+import org.sonar.java.EndOfAnalysisCheck;
 import org.sonar.java.ExceptionHandler;
 import org.sonar.java.IllegalRuleParameterException;
 import org.sonar.java.JavaVersionAwareVisitor;
@@ -153,7 +153,8 @@ public class VisitorsBridge {
       }
       LOG.error(
         String.format("Unable to run check %s - %s on file %s, To help improve SonarJava, please report this problem to SonarSource : see https://www.sonarqube.org/community/",
-          scanner.getClass(), key, currentFile.getPath()), e);
+          scanner.getClass(), key, currentFile.getPath()),
+        e);
       addAnalysisError(e, currentFile.getPath(), kind);
     }
   }
@@ -211,7 +212,7 @@ public class VisitorsBridge {
 
   public void processRecognitionException(RecognitionException e, File file) {
     addAnalysisError(e, file.getPath(), AnalysisError.Kind.PARSE_ERROR);
-    if(sonarComponents == null || !sonarComponents.reportAnalysisError(e, file)) {
+    if (sonarComponents == null || !sonarComponents.reportAnalysisError(e, file)) {
       this.visitFile(null);
       scanners.stream()
         .filter(scanner -> scanner instanceof ExceptionHandler)
@@ -225,17 +226,17 @@ public class VisitorsBridge {
   }
 
   public void endOfAnalysis() {
-    if(!classesNotFound.isEmpty()) {
+    if (!classesNotFound.isEmpty()) {
       String message = "";
-      if(classesNotFound.size() > 50) {
+      if (classesNotFound.size() > 50) {
         message = ", ...";
       }
       LOG.warn("Classes not found during the analysis : [{}{}]", classesNotFound.stream().limit(50).collect(Collectors.joining(", ")), message);
     }
-    scanners.stream()
-        .filter(s -> s instanceof CrossFileScanner)
-        .map(s -> (CrossFileScanner)s)
-        .forEach(CrossFileScanner::endOfAnalysis);
+    executableScanners.stream()
+      .filter(s -> s instanceof EndOfAnalysisCheck)
+      .map(EndOfAnalysisCheck.class::cast)
+      .forEach(EndOfAnalysisCheck::endOfAnalysis);
     classLoader.close();
   }
 }
